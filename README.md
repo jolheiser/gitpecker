@@ -1,6 +1,10 @@
 # gitpecker
 
-To set up, follow the [addon docs](https://woodpecker-ci.org/docs/administration/configuration/forges/addon) and define the following env vars for Woodpecker.
+Woodpecker addon forge for plain (bare) git repositories using generic OIDC for authentication.
+
+## Setup
+
+Follow the [addon docs](https://woodpecker-ci.org/docs/administration/configuration/forges/addon) and define the following env vars for Woodpecker.
 
 - `WOODPECKER_ADDON_FORGE` - Path to gitpecker binary
 - `GITPECKER_REPOS` - The location on disk that stores the **bare** `.git` repos.
