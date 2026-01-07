@@ -23,6 +23,7 @@ type config struct {
 
 	// Misc
 	logFilePath string
+	logJSON     bool
 }
 
 func main() {
@@ -35,7 +36,9 @@ func main() {
 		clientProvider:   mustEnv("provider"),
 		clientRedirect:   mustEnv("redirect"),
 		logFilePath:      env("log_file"),
+		logJSON:          env("log_json") == "1",
 	}
+
 	if cfg.clientSecretFile != "" {
 		content, err := os.ReadFile(cfg.clientSecretFile)
 		if err != nil {
@@ -46,6 +49,7 @@ func main() {
 	if cfg.clientSecret == "" {
 		panic("client secret is required")
 	}
+
 	logLevel := slog.LevelInfo
 	switch env("log_level") {
 	case "debug":
@@ -55,16 +59,26 @@ func main() {
 	case "error":
 		logLevel = slog.LevelError
 	}
-	logFile := os.Stderr
+
+	logOutput := os.Stderr
 	if cfg.logFilePath != "" {
 		fi, err := os.Create(cfg.logFilePath)
 		if err != nil {
 			panic(err)
 		}
 		defer fi.Close()
-		logFile = fi
+		logOutput = fi
 	}
-	slog.SetDefault(slog.New(slog.NewTextHandler(logFile, &slog.HandlerOptions{Level: logLevel})))
+
+	logOpts := &slog.HandlerOptions{Level: logLevel}
+	var logger slog.Handler
+	if cfg.logJSON {
+		logger = slog.NewJSONHandler(logOutput, logOpts)
+	} else {
+		logger = slog.NewTextHandler(logOutput, logOpts)
+	}
+	slog.SetDefault(slog.New(logger))
+
 	defer func() {
 		if r := recover(); r != nil {
 			slog.Info("addon forge panic", slog.Any("message", r))
