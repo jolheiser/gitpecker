@@ -24,7 +24,7 @@ import (
 var _ forge.Forge = (*config)(nil)
 
 func (c *config) repoURL(repo string) string {
-	return path.Join(c.url, repo)
+	return fmt.Sprintf("%s/%s", strings.TrimSuffix(c.url, "/"), repo)
 }
 
 func (c *config) cloneURL(repo string) string {
